@@ -23,10 +23,10 @@ class FinalBuyPage(BaseClass):
 
     # getters
     def get_total_sum(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.total_sum_on_final_page)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.total_sum_on_final_page)))
 
     def get_product_name(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.product_name_on_final_page)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.product_name_on_final_page)))
 
     # methods
     def assert_product_and_price_in_final_page_is_correct(self):
@@ -36,4 +36,7 @@ class FinalBuyPage(BaseClass):
         print("Товар и его стоимость отображаются на странице оформления заказа корректно")
         return self
 
-
+    def assert_total_price_in_final_page_is_correct(self, total_price):
+        """Проверка правильности товара и корректной стоимости выбранного количества единиц товара"""
+        assert total_price == self.get_total_sum().text
+        return self

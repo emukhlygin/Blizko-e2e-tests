@@ -9,6 +9,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
+from Utilities.Settings import Settings
+
 
 class AddedToCartModal(BaseClass):
     """Класс, описывающий модал, который открывается после нажатия кнопки добавления продукта в корзину"""
@@ -24,19 +26,23 @@ class AddedToCartModal(BaseClass):
     go_to_cart_button = "//*[contains(text(), 'Перейти к оформлению')]"
     product_name_in_modal = "//*[@class='orders-item-description-container']/p"
     product_total_price = "//*[@class='orders-item-total js-orders-item-total']"
+    close_modal_button = "//*[contains(text(), 'Вернуться к покупкам')]"
 
     # getters
     def get_add_more_product_button(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.add_more_product_button)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.add_more_product_button)))
 
     def get_go_to_cart_button(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.go_to_cart_button)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.go_to_cart_button)))
 
     def get_product_name(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.product_name_in_modal)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.product_name_in_modal)))
 
     def get_product_price(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.product_total_price)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.product_total_price)))
+
+    def get_close_modal_button(self):
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.close_modal_button)))
 
     # actions
     def click_add_more_product_button(self):
@@ -45,11 +51,14 @@ class AddedToCartModal(BaseClass):
     def click_go_to_cart_button(self):
         self.get_go_to_cart_button().click()
 
+    def click_close_modal_button(self):
+        self.get_close_modal_button().click()
+
     # methods
     def count_final_price(self, times):
         """Цена товара умножается на его количество и преобразуется в значение, которое будет сравниваться"""
         #self.final_price = str(float(self.product_price)*(times+1)).replace(".0", '')+" руб."
-        sum = float(self.product_price)*(times+1)
+        sum = float(self.product_price.replace(' ', ''))*(times+1)
         formated_sum = '{0:,}'.format(sum).replace(',', ' ').replace(".0", '')
         self.final_price = formated_sum +" руб."
 
@@ -77,6 +86,10 @@ class AddedToCartModal(BaseClass):
         except:
             exception = Exception("PriceIsWrong")
             raise exception
+
+    def close_modal_and_go_to_main_page(self):
+        self.click_close_modal_button()
+        self.driver.get(Settings.base_url)
 
     # asserts
     def assert_product_and_sum_in_modal_is_correct(self):

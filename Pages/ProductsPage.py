@@ -26,32 +26,36 @@ class ProductsPage(BaseClass):
     product_add_to_cart_button = f"//button[contains(@data-add-orders-item-data, 'product_id')]"
     product_name = f"//*[contains(@class, 'cp-title js-balloon-title')]/a[@data-event-item='product_id']"
     product_price = f"//*[@data-product-id='product_id']//i[contains(@class, 'price')]"
-    close_alert_button = "//*[@data-fl-close='1800']"
+    expand_filter_list_buttons = "//span[contains(text(), 'Посмотреть все')]"
+    filter_check = "//*[contains(text(), 'filter_name')]/../input"
 
     # getters
     def get_category_name(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.category_name)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.category_name)))
 
     def get_price_from(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.price_from)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.price_from)))
 
     def get_price_to(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.price_to)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.price_to)))
 
     def get_apply_filter_button(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.apply_filter_button)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.apply_filter_button)))
 
     def get_product_add_to_cart_button(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.product_add_to_cart_button.replace("product_id", self.product_id))))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.product_add_to_cart_button.replace("product_id", self.product_id))))
 
     def get_product_name(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.product_name.replace("product_id", self.product_id))))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.product_name.replace("product_id", self.product_id))))
 
     def get_product_price(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.product_price.replace("product_id", self.product_id))))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.product_price.replace("product_id", self.product_id))))
 
-    def get_close_alert_button(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.close_alert_button)))
+    def get_expand_filter_list_buttons(self):
+        return WebDriverWait(self.driver, 10).until(EC.visibility_of_all_elements_located((By.XPATH, self.expand_filter_list_buttons)))
+
+    def get_filter_check(self, filter_name):
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.filter_check.replace("filter_name", filter_name))))
 
     # actions
     def set_price_from(self, price_low):
@@ -65,24 +69,29 @@ class ProductsPage(BaseClass):
 
     def click_product_add_to_cart_button(self):
         self.action.move_to_element(self.get_product_add_to_cart_button()).click().perform()
+        # self.get_product_add_to_cart_button().click()
 
-    def click_close_alert_button(self):
-        """Нажатие на кнопку закрытия поп-апа, всплывающего периодически"""
-        try:
-            self.driver.switch_to.frame("fl-297849")
-            self.get_close_alert_button().click()
-            self.driver.switch_to.parent_frame()
-        except:
-            pass
+    def click_expand_filter_list_buttons(self):
+        for button in self.get_expand_filter_list_buttons():
+            self.action.move_to_element(button).click().perform()
+
+    def click_filter_check(self, filter_name):
+        element = self.get_filter_check(filter_name)
+        self.action.scroll_to_element(element).move_to_element(element).click().perform()
 
     # methods
-    def aplly_all_filters(self, price_low, price_high):
+    def aplly_all_filters(self, price_low, price_high, additional_filters):
         """Применение нужных фильтраций на список товаров"""
+        if additional_filters:
+            self.click_expand_filter_list_buttons()
+            for filter in additional_filters:
+                self.click_filter_check(filter)
+                time.sleep(1)
         self.set_price_from(price_low)
         self.set_price_to(price_high)
-        self.click_close_alert_button()
         self.click_apply_filters_button()
         print("Проведена фильтрация товаров")
+        self.action.move_to_element(self.get_category_name()).perform()  # хак для того, чтобы избежать всплывающих селекторов
         return self
 
     def add_product_to_cart(self):

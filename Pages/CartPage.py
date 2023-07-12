@@ -9,33 +9,44 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
+from Utilities.Settings import Settings
+
 
 class CartPage(BaseClass):
     """Класс, описывающий страницу корзины"""
-    def __init__(self, driver, product_price, product_name):
+    def __init__(self, driver, product_price='', product_name=''):
         super().__init__(driver)
         self.product_price = product_price
         self.product_name = product_name
         self.driver = driver
 
     # locators
-    go_to_buy_page_button = "//button[contains(text(), 'Перейти к оформлению')]"
+    go_to_buy_page_button = "//*[contains(text(), 'Перейти к оформлению')]"
     cart_page_product_price = "//p[@class='orders-item__total js-orders-item__total']"
     cart_page_product_name = "//a[@class='orders-item__title']"
+    all_delete_product_buttons = "//button[@title = 'Удалить из корзины']"
+    cart_product_total_sum = "//*[contains(text(), 'product_name')]//..//..//..//..//..//..//..//p[contains(@class, 'orders-cart-amount__total-value js-orders-cart-item__total')]"
 
     # getters
     def get_go_to_buy_page_button(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.go_to_buy_page_button)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.go_to_buy_page_button)))
 
     def get_cart_page_product_price(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.cart_page_product_price)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.cart_page_product_price)))
 
     def get_cart_page_product_name(self):
-        return WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.XPATH, self.cart_page_product_name)))
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.cart_page_product_name)))
+
+    def get_all_delete_product_buttons(self):
+        return WebDriverWait(self.driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, self.all_delete_product_buttons)))
 
     # actions
     def click_go_to_buy_page_button(self):
         self.get_go_to_buy_page_button().click()
+
+    def click_all_delete_product_buttons(self):
+        for button in self.get_all_delete_product_buttons():
+            button.click()
 
     # methods
     def go_to_final_buy_page(self):
@@ -45,6 +56,9 @@ class CartPage(BaseClass):
         fbp = FinalBuyPage(self.driver, product_price=self.product_price, product_name=self.product_name)
         return fbp
 
+    def clean_up_all_added_products(self):
+        self.click_all_delete_product_buttons()
+
     # asserts
     def assert_product_and_price_in_cart_is_correct(self):
         """Проверка правильности товара и корректной стоимости выбранного количества единиц товара"""
@@ -53,4 +67,8 @@ class CartPage(BaseClass):
         print("Товар и его стоимость отображаются в корзине корректно")
         return self
 
+    def assert_total_price_in_cart_is_correct(self, total_price):
+        """Проверка правильности товара и корректной стоимости выбранного количества единиц товара"""
+        assert total_price == self.get_cart_page_product_price().text
+        return self
 
