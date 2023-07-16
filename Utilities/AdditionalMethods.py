@@ -1,4 +1,4 @@
-def get_total_sum(products_details):
-    total_sum = sum(products_details.values())
-    formated_sum = '{0:,}'.format(total_sum).replace(',', ' ').replace(".0", '') + " руб."
+def get_total_sum_for_product(product_price, additional_products):
+    product_sum = product_price * (1+additional_products)
+    formated_sum = '{0:,}'.format(product_sum).replace(',', ' ').replace(".0", '') + " руб."
     return formated_sum

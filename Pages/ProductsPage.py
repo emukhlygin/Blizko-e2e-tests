@@ -55,7 +55,9 @@ class ProductsPage(BaseClass):
         return WebDriverWait(self.driver, 10).until(EC.visibility_of_all_elements_located((By.XPATH, self.expand_filter_list_buttons)))
 
     def get_filter_check(self, filter_name):
-        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.filter_check.replace("filter_name", filter_name))))
+        WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, self.filter_check.replace("filter_name", filter_name))))
+        return WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.XPATH, self.filter_check.replace("filter_name", filter_name))))
 
     # actions
     def set_price_from(self, price_low):
@@ -69,7 +71,6 @@ class ProductsPage(BaseClass):
 
     def click_product_add_to_cart_button(self):
         self.action.move_to_element(self.get_product_add_to_cart_button()).click().perform()
-        # self.get_product_add_to_cart_button().click()
 
     def click_expand_filter_list_buttons(self):
         for button in self.get_expand_filter_list_buttons():
@@ -82,13 +83,13 @@ class ProductsPage(BaseClass):
     # methods
     def aplly_all_filters(self, price_low, price_high, additional_filters):
         """Применение нужных фильтраций на список товаров"""
+        self.set_price_from(price_low)
+        self.set_price_to(price_high)
         if additional_filters:
             self.click_expand_filter_list_buttons()
             for filter in additional_filters:
-                self.click_filter_check(filter)
-                time.sleep(1)
-        self.set_price_from(price_low)
-        self.set_price_to(price_high)
+              self.click_filter_check(filter)
+              time.sleep(0.5)
         self.click_apply_filters_button()
         print("Проведена фильтрация товаров")
         self.action.move_to_element(self.get_category_name()).perform()  # хак для того, чтобы избежать всплывающих селекторов

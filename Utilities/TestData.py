@@ -42,8 +42,18 @@ class TestData:
             "product_name": 'Набор гирек для калибровки (500 гр.)',
             "additional_filters": ["Китай"]}
 
+    set5 = {"sub_category": "Смесители",
+            "category": "Строительство и ремонт",
+            "times": 5,
+            "price_low": "0",
+            "price_high": "100000",
+            "product_id": "214999336",
+            "product_price": 2355,
+            "product_name": 'Смеситель д/раковины MAGNUS 8400',
+            "additional_filters": ['однорычажный', 'встраиваемый', 'шаровый', 'сталь', 'аэратор', 'гибкая', 'Magnus']}
 
-    data_sets = [set1, set2, set3, set4]
+
+    data_sets = [set1, set2, set3, set4, set5]
 
     @staticmethod
     def random_data_set(quantity):

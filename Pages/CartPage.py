@@ -40,6 +40,9 @@ class CartPage(BaseClass):
     def get_all_delete_product_buttons(self):
         return WebDriverWait(self.driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, self.all_delete_product_buttons)))
 
+    def get_cart_product_total_sum(self, product_name):
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.cart_product_total_sum.replace("product_name", product_name))))
+
     # actions
     def click_go_to_buy_page_button(self):
         self.get_go_to_buy_page_button().click()
@@ -71,4 +74,8 @@ class CartPage(BaseClass):
         """Проверка правильности товара и корректной стоимости выбранного количества единиц товара"""
         assert total_price == self.get_cart_page_product_price().text
         return self
+
+    def assert_total_prices_for_all_products_are_correct(self, product_details):
+        for product in product_details:
+            assert self.get_cart_product_total_sum(product).text == product_details[product]
 
