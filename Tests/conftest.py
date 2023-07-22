@@ -1,13 +1,7 @@
-import json
-import time
-
 import pytest
 from selenium import webdriver
-
-from Pages.LoginModal import LoginModal
 from Pages.MainPage import MainPage
 from Utilities.Settings import Settings
-from Utilities.TestData import TestData
 
 
 @pytest.fixture()
@@ -24,4 +18,3 @@ def set_up():
         mpg.enter_cart()\
            .clean_up_all_added_products()         # удаление продуктов в корзине
     driver.close()
-

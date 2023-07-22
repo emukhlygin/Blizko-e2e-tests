@@ -1,12 +1,7 @@
-import time
-
-from selenium import *
 from Base.BaseClass import BaseClass
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
 
 
 class LoginModal(BaseClass):
@@ -41,6 +36,8 @@ class LoginModal(BaseClass):
 
     # methods
     def log_in_application(self, email, password):
+        """Ввод логина и пароля в модале авторизации"""
         self.enter_email(email)
         self.enter_password(password)
         self.click_enter_button()
+        print(f"\nАвторизация тестового пользователя {email} осуществлена")

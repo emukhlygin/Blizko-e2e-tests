@@ -1,15 +1,10 @@
-import time
-
-from selenium import *
 from Base.BaseClass import BaseClass
 from Pages.CartPage import CartPage
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
-
 from Utilities.Settings import Settings
+from Utilities.AdditionalMethods import get_total_sum_for_product
 
 
 class AddedToCartModal(BaseClass):
@@ -57,11 +52,8 @@ class AddedToCartModal(BaseClass):
     # methods
     def count_final_price(self, times):
         """Цена товара умножается на его количество и преобразуется в значение, которое будет сравниваться"""
-        #self.final_price = str(float(self.product_price)*(times+1)).replace(".0", '')+" руб."
-        sum = float(self.product_price.replace(' ', ''))*(times+1)
-        formated_sum = '{0:,}'.format(sum).replace(',', ' ').replace(".0", '')
-        self.final_price = formated_sum +" руб."
-
+        price = float(self.product_price.replace(' ', ''))
+        self.final_price = get_total_sum_for_product(price, times)
         print(f"Итогая стоимость выбранного количества товара - {self.final_price}")
 
     def add_more_units_of_product(self, times):
@@ -88,6 +80,7 @@ class AddedToCartModal(BaseClass):
             raise exception
 
     def close_modal_and_go_to_main_page(self):
+        """Закрытие модала и возвращение на главную страницу"""
         self.click_close_modal_button()
         self.driver.get(Settings.base_url)
 

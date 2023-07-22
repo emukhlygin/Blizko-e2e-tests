@@ -1,15 +1,8 @@
-import time
-
-from selenium import *
 from Base.BaseClass import BaseClass
 from Pages.FinalBuyPage import FinalBuyPage
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
-
-from Utilities.Settings import Settings
 
 
 class CartPage(BaseClass):
@@ -25,7 +18,8 @@ class CartPage(BaseClass):
     cart_page_product_price = "//p[@class='orders-item__total js-orders-item__total']"
     cart_page_product_name = "//a[@class='orders-item__title']"
     all_delete_product_buttons = "//button[@title = 'Удалить из корзины']"
-    cart_product_total_sum = "//*[contains(text(), 'product_name')]//..//..//..//..//..//..//..//p[contains(@class, 'orders-cart-amount__total-value js-orders-cart-item__total')]"
+    cart_product_total_sum = "//*[contains(text(), 'product_name')]//..//..//..//..//..//..//..//" \
+                             "p[contains(@class, 'orders-cart-amount__total-value js-orders-cart-item__total')]"  # сложный составной xpath для поиска суммы по названию продукта
 
     # getters
     def get_go_to_buy_page_button(self):
@@ -60,7 +54,9 @@ class CartPage(BaseClass):
         return fbp
 
     def clean_up_all_added_products(self):
+        """Удаление всех продуктов, которые есть в корзине"""
         self.click_all_delete_product_buttons()
+        print("\nВсе товары удалены из корзины")
 
     # asserts
     def assert_product_and_price_in_cart_is_correct(self):
@@ -70,12 +66,9 @@ class CartPage(BaseClass):
         print("Товар и его стоимость отображаются в корзине корректно")
         return self
 
-    def assert_total_price_in_cart_is_correct(self, total_price):
-        """Проверка правильности товара и корректной стоимости выбранного количества единиц товара"""
-        assert total_price == self.get_cart_page_product_price().text
-        return self
-
     def assert_total_prices_for_all_products_are_correct(self, product_details):
+        """Проверка правильности итоговыъ сумм для всех продуктов в корзине"""
         for product in product_details:
             assert self.get_cart_product_total_sum(product).text == product_details[product]
+            print(f"\nИнформация для продукта {product} отображается верно")
 
