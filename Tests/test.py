@@ -4,7 +4,7 @@ from Utilities.AdditionalMethods import get_total_sum_for_product
 from Utilities.TestData import TestData
 
 
-@pytest.mark.parametrize('data_set', TestData.random_data_set(1))             # тест прогоняется 2 раза по рандомным товарам
+@pytest.mark.parametrize('data_set', TestData.random_data_set(2))             # тест прогоняется 2 раза по рандомным товарам
 def test_select_product(set_up, data_set):
     """Тест-кейс: выбор продукта, добавление его в корзину, проверка правильного отображения в корзине и на странице
     покупки"""
