@@ -1,4 +1,6 @@
 import time
+
+from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -22,9 +24,9 @@ class ProductsPage(BaseClass):
     product_add_to_cart_button = f"//button[contains(@data-add-orders-item-data, 'product_id')]"
     product_name = f"//*[contains(@class, 'cp-title js-balloon-title')]/a[@data-event-item='product_id']"
     product_price = f"//*[@data-product-id='product_id']//i[contains(@class, 'price')]"
-    expand_filter_list_buttons = "//span[contains(text(), 'Посмотреть все')]"
-    filter_check = "//*[contains(text(), 'filter_name')]/../input"
     chat_button = "[id=supportTrigger]"
+    filter_check = "//*[contains(text(), 'filter_name')]/../input"
+    expand_filter_list_button = "//*[contains(text(), 'filter_name')]//..//..//..//..//span[contains(text(), 'Посмотреть все')]"
 
     # getters
     def get_category_name(self):
@@ -48,16 +50,20 @@ class ProductsPage(BaseClass):
     def get_product_price(self, product_id):
         return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, self.product_price.replace("product_id", product_id))))
 
-    def get_expand_filter_list_buttons(self):
-        return WebDriverWait(self.driver, 10).until(EC.visibility_of_all_elements_located((By.XPATH, self.expand_filter_list_buttons)))
+    def get_chat_button(self):
+        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, self.chat_button)))
+
+    def get_expand_filter_group_button(self, filter_name):
+        element = self.driver.find_element(By.XPATH, self.expand_filter_list_button.replace("filter_name", filter_name))
+        return WebDriverWait(self.driver, 3).until(EC.element_to_be_clickable(element))
 
     def get_filter_check(self, filter_name):
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, self.filter_check.replace("filter_name", filter_name))))
         return WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.XPATH, self.filter_check.replace("filter_name", filter_name))))
 
-    def get_chat_button(self):
-        return WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, self.chat_button)))
+    def get_filter_check_no_waiting(self, filter_name):
+        return self.driver.find_element(By.XPATH, self.filter_check.replace("filter_name", filter_name))
 
     # actions
     def set_price_from(self, price_low):
@@ -72,28 +78,30 @@ class ProductsPage(BaseClass):
     def click_product_add_to_cart_button(self, product_id):
         self.action.move_to_element(self.get_product_add_to_cart_button(product_id)).click().perform()
 
-    def click_expand_filter_list_buttons(self):
-        for button in self.get_expand_filter_list_buttons():
-            self.action.move_to_element(button).click().perform()
+    def delete_chat_button(self):
+        self.get_chat_button()
+        self.driver.execute_script(f"$('{self.chat_button}').remove()")
 
     def click_filter_check(self, filter_name):
         element = self.get_filter_check(filter_name)
         self.action.scroll_to_element(element).move_to_element(element).click().perform()
 
-    def delete_chat_button(self):
-        self.get_chat_button()
-        self.driver.execute_script(f"$('{self.chat_button}').remove()")
+    def click_expand_filter_list_button(self, filter_name):
+        element = self.get_expand_filter_group_button(filter_name)
+        self.action.move_to_element(element).click().perform()
 
-        # methods
+    # methods
     def aplly_all_filters(self, price_low, price_high, additional_filters):
         """Применение нужных фильтраций на список товаров"""
         self.set_price_from(price_low)
         self.set_price_to(price_high)
+
         if additional_filters:
-            self.click_expand_filter_list_buttons()          # раскрытие всех списков фильтров
-            for filter in additional_filters:
-              self.click_filter_check(filter)
-              time.sleep(0.5)                  # не удалось обойтись одними только ожиданиями для стабильного выбора фильтров
+            for wanted_filter in additional_filters:
+                if not self.get_filter_check_no_waiting(wanted_filter).is_displayed():   # если чекбокс нужного фильтра скрыт,
+                    self.click_expand_filter_list_button(wanted_filter)      # то группа, в которой он находится, раскрывается
+                self.click_filter_check(wanted_filter)
+
         self.click_apply_filters_button()
         print("Проведена фильтрация товаров")
         self.action.move_to_element(self.get_category_name()).perform()  # хак для того, чтобы избежать всплывающих селекторов бокового меню
